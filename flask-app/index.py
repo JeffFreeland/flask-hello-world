@@ -1,6 +1,7 @@
 from flask import Flask
 
 import os
+import urllib
 
 
 app = Flask(__name__)
@@ -29,6 +30,18 @@ def from_file():
         return line
     return "Something went wrong"
 
+@app.route("/from-other-service")
+def from_other_service():
+    SECOND_SERVICE_URL = os.getenv('SECOND_SERVICE_URL', default=None)
+    if SECOND_SERVICE_URL == None: 
+        return "There is no second service specified"
+    
+    try: 
+        with urllib.request.urlopen(SECOND_SERVICE_URL) as response:
+            return response.read()
+    except: 
+        return f"Something went wrong accessing the second service: {SECOND_SERVICE_URL}"
+    
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=int("5000"), debug=True)
